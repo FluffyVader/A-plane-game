@@ -9,6 +9,8 @@ from pygame.locals import (
     QUIT,
 )
 
+import random
+
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
@@ -34,9 +36,13 @@ while running:
                 running = False
         elif event.type == QUIT:
             running = False
+    
+    pressed_keys = pygame.key.get_pressed()
 
     screen.fill((0, 0, 0))
+    
     screen.blit(player.surf, (SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+    pressed_keys = pygame.key.get_pressed()
 
     pygame.display.flip()
 
@@ -51,3 +57,21 @@ def update(self, pressed_keys):
         self.rect.move_ip(-5, 0)
     if pressed_keys[K_RIGHT]:
         self.rect.move_ip(5, 0)
+
+    if self.rect.left < 0:
+        self.rect.left = 0
+    if self.rect.right > SCREEN_WIDTH:
+        self.rect.right = SCREEN_WIDTH
+    if self.rect.top <= 0:
+        self.rect.top = 0
+    if self.rect.bottom >= SCREEN_HEIGHT:
+        self.rect.bottom = SCREEN_HEIGHT
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Enemy, self).__init__()
+        self.surf = pygame.Surface((20, 10))
+        self.surf.fill((255, 255, 255))
+        self.rect = self.surf.get_rect()
+        center=(random.randint(SCREEN_WIDTH + 20, SCREEN_WIDTH + 100),random.randint(0, SCREEN_HEIGHT))
+ 
