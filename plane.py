@@ -37,13 +37,14 @@ class Player(pygame.sprite.Sprite):
         if pressed_keys[K_RIGHT]:
             self.rect.move_ip(self.movement_speed, 0)
 
+        #Give some inbounds to the screen so the player cannot go off the screen
         if self.rect.left < 0:
             self.rect.left = 0
         if self.rect.right > SCREEN_WIDTH:
             self.rect.right = SCREEN_WIDTH
-        if self.rect.top <= 0:
+        if self.rect.top < 0:
             self.rect.top = 0
-        if self.rect.bottom >= SCREEN_HEIGHT:
+        if self.rect.bottom > SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
 
 ###################################################################################################
@@ -53,22 +54,32 @@ class Enemy(pygame.sprite.Sprite):
         super(Enemy, self).__init__()
         self.surf = pygame.Surface((20, 10))
         self.surf.fill((255, 255, 255))
-        self.rect = self.surf.get_rect()
-        center=(random.randint(SCREEN_WIDTH + 20, SCREEN_WIDTH + 100),random.randint(0, SCREEN_HEIGHT))
+        self.rect = self.surf.get_rect(
+            center=( 
+                    random.randint(SCREEN_WIDTH + 20, SCREEN_WIDTH + 100),
+                    random.randint(0, SCREEN_HEIGHT)
+                    )
+        )
 
         self.speed = random.randint(5, 20)
 
+    def update(self):
+        self.rect.move_ip(-self.speed, 0)
+        if self.rect.right < 0:
+            self.kill()
 ###################################################################################################
 
 pygame.init()
 
 screen_surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
+# Create a custom event for adding a new enemy
 ADDENEMY = pygame.USEREVENT + 1
-pygame.time.set_timer(ADDENEMY, 250)
+pygame.time.set_timer(ADDENEMY, 1000)
 
 
 player = Player()
+
 
 # Create groups to hold enemy sprites and all sprites
 # - enemies is used for collision detection and position updates
@@ -89,6 +100,7 @@ while running:
             running = False
 
         elif event.type == ADDENEMY:
+            print("enemy added")
             new_enemy = Enemy()
             enemies.add(new_enemy)
             all_sprites.add(new_enemy)
@@ -96,26 +108,19 @@ while running:
     
     pressed_keys = pygame.key.get_pressed()
     player.update(pressed_keys)
+    
+    # Update enemy position
+    #for enemy in enemies:
+    #    enemy.update()
+    enemies.update()
+
 
     screen_surface.fill((0, 0, 0))
     
-    screen_surface.blit(player.surf, player.rect)
+    for entity in all_sprites:
+        screen_surface.blit(entity.surf, entity.rect)
+
+    #screen_surface.blit(player.surf, player.rect)
     #screen_surface.blit(player.surf, (SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
     
-    
-
-    #enemies.update()
-
     pygame.display.flip()
-
-
-
-
-
-
-    #def update(self):
-    #    self.rect.move_ip(-self.speed, 0)
-    #    if self.rect.right < 0:
-    #        self.kill()
-
-
