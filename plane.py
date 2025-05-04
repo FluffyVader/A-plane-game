@@ -120,6 +120,12 @@ while running:
     for entity in all_sprites:
         screen_surface.blit(entity.surf, entity.rect)
 
+# Check if any enemies have collided with the player
+    if pygame.sprite.spritecollideany(player,enemies):
+        player.kill()
+        running = False
+    # If so, then remove the player and stop the loop
+
     #screen_surface.blit(player.surf, player.rect)
     #screen_surface.blit(player.surf, (SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
     
