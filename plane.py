@@ -17,8 +17,6 @@ import random
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-clock = pygame.time.Clock()
-
 ###################################################################################################
 
 class Player(pygame.sprite.Sprite):
@@ -33,13 +31,17 @@ class Player(pygame.sprite.Sprite):
         #self.rect.x = SCREEN_WIDTH/2 - self.rect.width/2
         #self.rect.y = SCREEN_HEIGHT/2 - self.rect.height/2
         self.movement_speed = 1
+        self.move_up_sound = pygame.mixer.Sound("sounds/Rising_putter.ogg")
+        self.move_down_sound = pygame.mixer.Sound("sounds/Falling_putter.ogg")
+        self.collision_sound = pygame.mixer.Sound("sounds/Collision.ogg")
 
-    
     def update(self, pressed_keys):
         if pressed_keys[K_UP]:
            self.rect.move_ip(0, -self.movement_speed)
+           self.move_up_sound.play()
         if pressed_keys[K_DOWN]:
             self.rect.move_ip(0, self.movement_speed)
+            self.move_down_sound.play()
         if pressed_keys[K_LEFT]:
             self.rect.move_ip(-self.movement_speed, 0)
         if pressed_keys[K_RIGHT]:
@@ -54,6 +56,17 @@ class Player(pygame.sprite.Sprite):
             self.rect.top = 0
         if self.rect.bottom > SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
+
+    def play_collision_sound(self):
+        self.collision_sound.play()
+    
+    def stop_navigation_sounds(self):
+        self.move_up_sound.stop()
+        self.move_down_sound.stop()
+
+    #def __del__(self):
+    #    self.move_up_sound.stop()
+    #    self.move_down_sound.stop()
 
 ###################################################################################################
 
@@ -102,6 +115,17 @@ class Cloud(pygame.sprite.Sprite):
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 pygame.init()
+
+pygame.mixer.init()
+
+# Load and play background music
+# Sound source: http://ccmixter.org/files/Apoxode/59262
+# License: https://creativecommons.org/licenses/by/3.0/
+
+pygame.mixer.music.load("sounds/Apoxode_-_Electric_1.mp3")
+pygame.mixer.music.play(loops=-1)
+
+clock = pygame.time.Clock()
 
 screen_surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
@@ -163,7 +187,11 @@ while running:
 
     # Check if any enemies have collided with the player
     if pygame.sprite.spritecollideany(player,enemies):
+        player.play_collision_sound()
+        player.stop_navigation_sounds()
+        
         player.kill()
+
         running = False
 
     #screen_surface.blit(player.surf, player.rect)
@@ -172,3 +200,6 @@ while running:
     pygame.display.flip()
 
     clock.tick(30)
+
+pygame.mixer.music.stop()
+pygame.mixer.quit()
